@@ -17,4 +17,7 @@ int main()
     hMap.insert( (char*)"/source/images/test.png", (char*)"testValueSource" );
     std::cout<<"/models/textures/knight.obj: ";
     hMap.insert( (char*)"/models/textures/knight.obj", (char*)"testValueModels" );
+
+	std::cout<<"Find"<<std::endl;
+	std::cout<<hMap.get((char*)"banana")<<std::endl;
 }

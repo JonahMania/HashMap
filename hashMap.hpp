@@ -15,6 +15,7 @@
 
 typedef int ( *hashMapCompare )( void *x, void *y ); 
 typedef uint32_t ( *hashMapHash )( void *k );
+
 const int defaultBuckets = 100; 
 
 template <typename K, typename V>
@@ -23,11 +24,6 @@ struct HashMapNode
     K *key;
     void *value;
     uint32_t hash;
-
-	HashMapNode()
-	{
-		value = NULL;
-	};
 };
 
 
@@ -70,9 +66,7 @@ uint32_t defaultHash( void *k )
     {
         
         hash = hash ^ (unsigned int)key[i];
-        //std::cout<< int(key[i]) <<std::endl;
     }
-    std::cout << hash << std::endl; 
 
     return hash;
 }
@@ -161,7 +155,8 @@ V HashMap<K,V>::remove( K k )
 template <typename K, typename V>
 V HashMap<K,V>::get( K k )
 {
-
+	uint32_t hashValue = hash( k );
+	return (V)buckets[ hashValue ].value;
 }
 
 template <typename K, typename V>
