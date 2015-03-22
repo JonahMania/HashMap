@@ -21,9 +21,14 @@ const int defaultBuckets = 100;
 template <typename K, typename V>
 struct HashMapNode
 {
-    K *key;
+    K key;
     void *value;
     uint32_t hash;
+
+	HashMapNode()
+	{
+		value = NULL;
+	}
 };
 
 
@@ -137,9 +142,14 @@ V HashMap<K,V>::insert( K k, V v )
         buckets = tempBuckets;
         numBuckets = hashValue;
     }
-
+/*
+	if( !buckets[hashValue].value )
+		std::cout<<"Not Null"<<std::endl;
+*/
+	//std::cout<<buckets[hashValue].value<<std::endl;
 
     buckets[hashValue].value = v;
+	buckets[hashValue].key = k;
 
 	//Must typecast a void* to the desired datatype before dereferencing so the compiler knows what size to look for
 	std::cout<< (char*)(V)buckets[hashValue].value <<std::endl;
