@@ -47,7 +47,7 @@ class HashMap
         ~HashMap();                                 //Deconstructor for Hashmap
     private:
         HashMapNode<K,V>* buckets;                  //Array of buckets to hold hashing nodes
-        int numBuckets;                             //Number of buvkets in the hashmap
+        int numBuckets;                             //Number of buckets in the hashmap
         hashMapCompare compare;                     //Function to compare two nodes
         hashMapHash hash;                           //Hashing function
 };
@@ -69,10 +69,8 @@ uint32_t defaultHash( void *k )
 
     for( int i = 0; i < len; ++i )
     {
-        
         hash = hash ^ (unsigned int)key[i];
     }
-
     return hash;
 }
 
@@ -82,7 +80,7 @@ HashMap<K,V>::HashMap()
     hash = defaultHash;
     compare = defaultCompare;
 
-    HashMapNode<K,V> b[defaultBuckets];    
+    HashMapNode<K,V>* b = new HashMapNode<K,V>[defaultBuckets];    
     buckets = b;
 
     numBuckets = defaultBuckets;
@@ -94,7 +92,7 @@ HashMap<K,V>::HashMap( hashMapHash h )
     hash = h;
     compare = defaultCompare;
 
-    HashMapNode<K,V> b[defaultBuckets];    
+    HashMapNode<K,V>* b = new HashMapNode<K,V>[defaultBuckets]; 
     buckets = b;
 
     numBuckets = defaultBuckets;
@@ -106,7 +104,7 @@ HashMap<K,V>::HashMap( hashMapCompare c )
     hash = defaultHash;
     compare = c;
 
-    HashMapNode<K,V> b[defaultBuckets];    
+    HashMapNode<K,V>* b = new HashMapNode<K,V>[defaultBuckets];  
     buckets = b;
 
     numBuckets = defaultBuckets;
@@ -118,7 +116,7 @@ HashMap<K,V>::HashMap( hashMapHash h, hashMapCompare c )
     hash = h;
     compare = c;
 
-    HashMapNode<K,V> b[defaultBuckets];    
+    HashMapNode<K,V>* b = new HashMapNode<K,V>[defaultBuckets];
     buckets = b;
 
     numBuckets = defaultBuckets;
@@ -130,17 +128,24 @@ V HashMap<K,V>::insert( K k, V v )
     //Get hash value from key k
     uint32_t hashValue = hash( k );
 
+	std::cout<< hashValue << std::endl;
+
     //If the hash is larger then the number of buckets expand the array
     if( hashValue > numBuckets )
     {
-        HashMapNode<K,V> tempBuckets[hashValue];
+		std::cout<<"expanding buckets"<<std::endl;
+
+        HashMapNode<K,V>* tempBuckets = new HashMapNode<K,V>[ hashValue + 1 ];
 
         for( int i = 0; i < numBuckets; ++i )
             tempBuckets[i] = buckets[i];
 
-        //delete [] buckets;
+        delete [] buckets;
         buckets = tempBuckets;
-        numBuckets = hashValue;
+
+
+		//HashMapNode<K,V>* tempBuckets = new HashMapNode<K,V>[ hashValue + 1];
+        numBuckets = hashValue + 1;
     }
 /*
 	if( !buckets[hashValue].value )
@@ -152,7 +157,7 @@ V HashMap<K,V>::insert( K k, V v )
 	buckets[hashValue].key = k;
 
 	//Must typecast a void* to the desired datatype before dereferencing so the compiler knows what size to look for
-	std::cout<< (char*)(V)buckets[hashValue].value <<std::endl;
+	std::cout<< (V)buckets[hashValue].value <<std::endl;
 
 }
 
@@ -166,6 +171,7 @@ template <typename K, typename V>
 V HashMap<K,V>::get( K k )
 {
 	uint32_t hashValue = hash( k );
+	std::cout<<hashValue<<std::endl;
 	return (V)buckets[ hashValue ].value;
 }
 
