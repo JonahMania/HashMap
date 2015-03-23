@@ -24,10 +24,18 @@ struct HashMapNode
     K key;
     void *value;
     uint32_t hash;
+	HashMapNode<K,V>* next;	
 
 	HashMapNode()
 	{
 		value = NULL;
+		next = NULL;
+	}
+	HashMapNode( K k, V v )
+	{
+		value = v;
+		key = k;
+		next = NULL;
 	}
 };
 
@@ -133,28 +141,34 @@ V HashMap<K,V>::insert( K k, V v )
     //If the hash is larger then the number of buckets expand the array
     if( hashValue > numBuckets )
     {
-		std::cout<<"expanding buckets"<<std::endl;
-
         HashMapNode<K,V>* tempBuckets = new HashMapNode<K,V>[ hashValue + 1 ];
 
         for( int i = 0; i < numBuckets; ++i )
             tempBuckets[i] = buckets[i];
 
         delete [] buckets;
-        buckets = tempBuckets;
-
-
-		//HashMapNode<K,V>* tempBuckets = new HashMapNode<K,V>[ hashValue + 1];
+        buckets = tempBuckets;	
         numBuckets = hashValue + 1;
     }
-/*
+	
+	//If there is no value in the current hashvalue bucket
 	if( !buckets[hashValue].value )
-		std::cout<<"Not Null"<<std::endl;
-*/
-	//std::cout<<buckets[hashValue].value<<std::endl;
-
-    buckets[hashValue].value = v;
-	buckets[hashValue].key = k;
+	{
+		buckets[hashValue].value = v;
+		buckets[hashValue].key = k;
+	}
+	else
+	{
+		//Set a pointer to the current bucket
+		HashMapNode<K,V>* currBucket = &buckets[hashValue];
+		//Move through the linked lists of buckets until an empty bucket is found
+		while( currBucket->next  )
+		{
+			currBucket = currBucket->next;
+		}
+		//When an empty bucket is found attach a new node to it with the desired values
+		currBucket->next = new HashMapNode<K,V>( k,v ); 
+	}
 
 	//Must typecast a void* to the desired datatype before dereferencing so the compiler knows what size to look for
 	std::cout<< (V)buckets[hashValue].value <<std::endl;
