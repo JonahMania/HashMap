@@ -152,7 +152,7 @@ V HashMap<K,V>::insert( K k, V v )
     }
 	
 	//If there is no value in the current hashvalue bucket
-	if( !buckets[hashValue].value )
+	if( !buckets[hashValue].value || buckets[hashValue].key == k )
 	{
 		buckets[hashValue].value = v;
 		buckets[hashValue].key = k;
@@ -162,17 +162,23 @@ V HashMap<K,V>::insert( K k, V v )
 		//Set a pointer to the current bucket
 		HashMapNode<K,V>* currBucket = &buckets[hashValue];
 		//Move through the linked lists of buckets until an empty bucket is found
-		while( currBucket->next  )
+		while( currBucket->next and currBucket->key != k )
 		{
 			currBucket = currBucket->next;
+			if( currBucket->key == k )
+			{
+				currBucket->value = v;
+				return v;
+			}
 		}
 		//When an empty bucket is found attach a new node to it with the desired values
-		currBucket->next = new HashMapNode<K,V>( k,v ); 
+		currBucket->next = new HashMapNode<K,V>( k,v );
+		//delete currBucket; 
 	}
 
 	//Must typecast a void* to the desired datatype before dereferencing so the compiler knows what size to look for
 	std::cout<< (V)buckets[hashValue].value <<std::endl;
-
+	return v;
 }
 
 template <typename K, typename V>
@@ -184,9 +190,19 @@ V HashMap<K,V>::remove( K k )
 template <typename K, typename V>
 V HashMap<K,V>::get( K k )
 {
+	//Get the hash value of k
 	uint32_t hashValue = hash( k );
-	std::cout<<hashValue<<std::endl;
-	return (V)buckets[ hashValue ].value;
+	//Check if the has bucket has key k
+	if( buckets[hashValue].key == k )
+		return (V)buckets[hashValue].value;
+	else
+	{
+		//Look through the linked list to find key k
+		HashMapNode<K,V>* currBucket = &buckets[hashValue];
+		while( currBucket->next and currBucket->key != k )
+			currBucket = currBucket->next;
+		return (V)currBucket->value;
+	}
 }
 
 template <typename K, typename V>
