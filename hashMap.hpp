@@ -50,7 +50,7 @@ class HashMap
         HashMap( hashMapHash h, hashMapCompare c ); //Constructor when hash and compare are provided
         V insert( K k, V v);                        //Insert a key value pair to the hashmap
         V get( K k );                               //Get a value from the hashmap with key k 
-        V remove( K k );                            //Remove value mapped to key k
+        void remove( K k );                         //Remove value mapped to key k
         void clear();                               //Removes all key, value pairs from the hashmap
         ~HashMap();                                 //Deconstructor for Hashmap
     private:
@@ -182,9 +182,28 @@ V HashMap<K,V>::insert( K k, V v )
 }
 
 template <typename K, typename V>
-V HashMap<K,V>::remove( K k )
+void HashMap<K,V>::remove( K k )
 {
-
+	
+	uint32_t hashValue = hash( k );	
+	if( buckets[hashValue].key == k )
+	{
+		buckets[hashValue] = *buckets[hashValue].next;
+	}
+	else
+	{
+		//Set a pointer to the current bucket
+		HashMapNode<K, V>* currBucket = &buckets[hashValue];
+		while( currBucket )
+		{
+			if( currBucket->key == k )
+			{
+			
+			}
+			currBucket = currBucket->next;
+		}
+	}
+		
 }
 
 template <typename K, typename V>
@@ -201,14 +220,15 @@ V HashMap<K,V>::get( K k )
 		HashMapNode<K,V>* currBucket = &buckets[hashValue];
 		while( currBucket->next and currBucket->key != k )
 			currBucket = currBucket->next;
-		return (V)currBucket->value;
+		if( currBucket->key == k )
+			return (V)currBucket->value;
 	}
 }
 
 template <typename K, typename V>
 HashMap<K,V>::~HashMap()
 {
-
+ 
 }
 
 #endif
