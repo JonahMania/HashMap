@@ -49,7 +49,7 @@ class HashMap
         HashMap( hashMapCompare c );                //Constructor when compare is provided
         HashMap( hashMapHash h, hashMapCompare c ); //Constructor when hash and compare are provided
         V insert( K k, V v);                        //Insert a key value pair to the hashmap
-        V get( K k );                               //Get a value from the hashmap with key k 
+        void *get( K k );                               //Get a value from the hashmap with key k 
         void remove( K k );                         //Remove value mapped to key k
         void clear();                               //Removes all key, value pairs from the hashmap
         ~HashMap();                                 //Deconstructor for Hashmap
@@ -192,14 +192,19 @@ void HashMap<K,V>::remove( K k )
 	}
 	else
 	{
+		//Set a pointer to the previous bucket
+		HashMapNode<K, V>* prevBucket = &buckets[hashValue];
 		//Set a pointer to the current bucket
-		HashMapNode<K, V>* currBucket = &buckets[hashValue];
+		HashMapNode<K, V>* currBucket = buckets[hashValue].next;
 		while( currBucket )
 		{
 			if( currBucket->key == k )
 			{
-			
+				delete prevBucket->next;
+				prevBucket->next = currBucket->next;
+				break;
 			}
+			prevBucket = prevBucket->next;
 			currBucket = currBucket->next;
 		}
 	}
@@ -207,13 +212,13 @@ void HashMap<K,V>::remove( K k )
 }
 
 template <typename K, typename V>
-V HashMap<K,V>::get( K k )
+void *HashMap<K,V>::get( K k )
 {
 	//Get the hash value of k
 	uint32_t hashValue = hash( k );
 	//Check if the has bucket has key k
 	if( buckets[hashValue].key == k )
-		return (V)buckets[hashValue].value;
+		return buckets[hashValue].value;
 	else
 	{
 		//Look through the linked list to find key k
@@ -221,8 +226,10 @@ V HashMap<K,V>::get( K k )
 		while( currBucket->next and currBucket->key != k )
 			currBucket = currBucket->next;
 		if( currBucket->key == k )
-			return (V)currBucket->value;
+			return currBucket->value;
 	}
+	//In the case that the key does not exist return NULL	
+	return NULL;
 }
 
 template <typename K, typename V>
