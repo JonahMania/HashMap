@@ -6,9 +6,9 @@
 * Date: 3/6/2015      *
 **********************/
 
-#include <vector>   //std::vector
 #include <stdint.h> //uint32_t
-#include <cstring>  //strcmp
+#include <cstddef> //NULL
+#include <cstring> //strlen
 
 //Hashing fuction
 typedef uint32_t ( *hashMapHash )( void *k );
