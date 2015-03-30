@@ -10,40 +10,33 @@
 #include <stdint.h> //uint32_t
 #include <cstring>  //strcmp
 
-//TEMP
-#include <iostream>
-
-typedef int ( *hashMapCompare )( void *x, void *y ); 
+//Hashing fuction
 typedef uint32_t ( *hashMapHash )( void *k );
-
+//Default bucket count
 const int defaultBuckets = 100; 
 
 template <typename K, typename V>
 struct HashMapNode
 {
+	//Key value of the node
     K key;
+	//Stored value for the key value pair
     void *value;
-    uint32_t hash;
+   	//The next hash node with the same hash value
 	HashMapNode<K,V>* next;	
-
+	//Default constructor
 	HashMapNode()
 	{
 		value = NULL;
 		next = NULL;
 	}
+	//Constructor with key and value pair
 	HashMapNode( K k, V v )
 	{
 		value = v;
 		key = k;
 		next = NULL;
 	}
-/*
-	void destroyHashMapNode()
-	{
-		if( value );
-			delete (V)value;
-	}
-*/
 };
 
 
@@ -53,8 +46,6 @@ class HashMap
     public:
         HashMap();                                  //Default constructor
         HashMap( hashMapHash h );                   //Constructor when hash is provided
-        HashMap( hashMapCompare c );                //Constructor when compare is provided
-        HashMap( hashMapHash h, hashMapCompare c ); //Constructor when hash and compare are provided
         V insert( K k, V v);                        //Insert a key value pair to the hashmap
         void *get( K k );                           //Get a value from the hashmap with key k 
         void remove( K k );                         //Remove value mapped to key k
@@ -63,16 +54,10 @@ class HashMap
     private:
         HashMapNode<K,V>* buckets;                  //Array of buckets to hold hashing nodes
         int numBuckets;                             //Number of buckets in the hashmap
-        hashMapCompare compare;                     //Function to compare two nodes
         hashMapHash hash;                           //Hashing function
 };
 
-//Default compare function used in the case that no compare function is passed to the constructor
-int defaultCompare( void *x, void *y  )
-{
-    return strcmp( (char*)x , (char*)y );
-}
-
+//Default hash function used in the case that no hash function is passed to the constructor
 uint32_t defaultHash( void *k )
 {
     char* key = (char*)k;
@@ -93,7 +78,6 @@ template <typename K, typename V>
 HashMap<K,V>::HashMap()
 {
     hash = defaultHash;
-    compare = defaultCompare;
 
     HashMapNode<K,V>* b = new HashMapNode<K,V>[defaultBuckets];    
     buckets = b;
@@ -105,33 +89,8 @@ template <typename K, typename V>
 HashMap<K,V>::HashMap( hashMapHash h )
 {
     hash = h;
-    compare = defaultCompare;
 
     HashMapNode<K,V>* b = new HashMapNode<K,V>[defaultBuckets]; 
-    buckets = b;
-
-    numBuckets = defaultBuckets;
-}
-
-template <typename K, typename V>
-HashMap<K,V>::HashMap( hashMapCompare c )
-{
-    hash = defaultHash;
-    compare = c;
-
-    HashMapNode<K,V>* b = new HashMapNode<K,V>[defaultBuckets];  
-    buckets = b;
-
-    numBuckets = defaultBuckets;
-}
-
-template <typename K, typename V>
-HashMap<K,V>::HashMap( hashMapHash h, hashMapCompare c )
-{
-    hash = h;
-    compare = c;
-
-    HashMapNode<K,V>* b = new HashMapNode<K,V>[defaultBuckets];
     buckets = b;
 
     numBuckets = defaultBuckets;
@@ -142,8 +101,6 @@ V HashMap<K,V>::insert( K k, V v )
 {
     //Get hash value from key k
     uint32_t hashValue = hash( k );
-
-	std::cout<< hashValue << std::endl;
 
     //If the hash is larger then the number of buckets expand the array
     if( hashValue > numBuckets )
@@ -180,18 +137,14 @@ V HashMap<K,V>::insert( K k, V v )
 		}
 		//When an empty bucket is found attach a new node to it with the desired values
 		currBucket->next = new HashMapNode<K,V>( k,v );
-		//delete currBucket; 
 	}
-
-	//Must typecast a void* to the desired datatype before dereferencing so the compiler knows what size to look for
-	std::cout<< (V)buckets[hashValue].value <<std::endl;
 	return v;
 }
 
 template <typename K, typename V>
 void HashMap<K,V>::remove( K k )
 {
-	
+	//Get hash value of k
 	uint32_t hashValue = hash( k );	
 	if( buckets[hashValue].key == k )
 	{
@@ -241,8 +194,31 @@ void *HashMap<K,V>::get( K k )
 }
 
 template <typename K, typename V>
+void HashMap<K,V>::clear()
+{
+	//Clear all linked lists in each bucket
+    for( int i = 0; i < numBuckets; ++i )
+    {
+        if( buckets[i].next )
+        {
+            HashMapNode<K,V>* currBucket = buckets[i].next;
+            HashMapNode<K,V>* next;
+            while( currBucket )
+            {
+                next = currBucket->next;
+                delete currBucket;
+                currBucket = next;
+            }
+        }
+		//Set each bucket to NULL
+		buckets[i] = NULL;
+    }
+}
+
+template <typename K, typename V>
 void HashMap<K,V>::destroyHashMap()
 {
+	//Clear all linked lists in each bucket
 	for( int i = 0; i < numBuckets; ++i )
 	{
 		if( buckets[i].next )
@@ -257,7 +233,7 @@ void HashMap<K,V>::destroyHashMap()
 			}
 		}
 	} 
-	
+	//Delete the buckets array
 	delete []buckets;
 }
 
