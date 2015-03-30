@@ -37,6 +37,13 @@ struct HashMapNode
 		key = k;
 		next = NULL;
 	}
+/*
+	void destroyHashMapNode()
+	{
+		if( value );
+			delete (V)value;
+	}
+*/
 };
 
 
@@ -49,10 +56,10 @@ class HashMap
         HashMap( hashMapCompare c );                //Constructor when compare is provided
         HashMap( hashMapHash h, hashMapCompare c ); //Constructor when hash and compare are provided
         V insert( K k, V v);                        //Insert a key value pair to the hashmap
-        void *get( K k );                               //Get a value from the hashmap with key k 
+        void *get( K k );                           //Get a value from the hashmap with key k 
         void remove( K k );                         //Remove value mapped to key k
         void clear();                               //Removes all key, value pairs from the hashmap
-        ~HashMap();                                 //Deconstructor for Hashmap
+        void destroyHashMap();                      //Deconstructor for Hashmap
     private:
         HashMapNode<K,V>* buckets;                  //Array of buckets to hold hashing nodes
         int numBuckets;                             //Number of buckets in the hashmap
@@ -200,6 +207,7 @@ void HashMap<K,V>::remove( K k )
 		{
 			if( currBucket->key == k )
 			{
+				//(*prevBucket->next).destroyHashMapNode();
 				delete prevBucket->next;
 				prevBucket->next = currBucket->next;
 				break;
@@ -233,9 +241,24 @@ void *HashMap<K,V>::get( K k )
 }
 
 template <typename K, typename V>
-HashMap<K,V>::~HashMap()
+void HashMap<K,V>::destroyHashMap()
 {
- 
+	for( int i = 0; i < numBuckets; ++i )
+	{
+		if( buckets[i].next )
+		{
+			HashMapNode<K,V>* currBucket = buckets[i].next;
+			HashMapNode<K,V>* next;
+			while( currBucket )
+			{				
+				next = currBucket->next;
+				delete currBucket;
+				currBucket = next;
+			}
+		}
+	} 
+	
+	delete []buckets;
 }
 
 #endif
