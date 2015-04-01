@@ -18,25 +18,25 @@ const int defaultBuckets = 100;
 template <typename K, typename V>
 struct HashMapNode
 {
-	//Key value of the node
+    //Key value of the node
     void *key;
-	//Stored value for the key value pair
+    //Stored value for the key value pair
     void *value;
-   	//The next hash node with the same hash value
-	HashMapNode<K,V>* next;	
-	//Default constructor
-	HashMapNode()
-	{
-		value = NULL;
-		next = NULL;
-	}
-	//Constructor with key and value pair
-	HashMapNode( K k, V v )
-	{
-		value = v;
-		key = k;
-		next = NULL;
-	}
+    //The next hash node with the same hash value
+    HashMapNode<K,V>* next; 
+    //Default constructor
+    HashMapNode()
+    {
+        value = NULL;
+        next = NULL;
+    }
+    //Constructor with key and value pair
+    HashMapNode( K k, V v )
+    {
+        value = v;
+        key = k;
+        next = NULL;
+    }
 };
 
 
@@ -111,98 +111,98 @@ V HashMap<K,V>::insert( K k, V v )
             tempBuckets[i] = buckets[i];
 
         delete [] buckets;
-        buckets = tempBuckets;	
+        buckets = tempBuckets;  
         numBuckets = hashValue + 1;
     }
-	
-	//If there is no value in the current hashvalue bucket
-	if( !buckets[hashValue].value || buckets[hashValue].key == k )
-	{
-		buckets[hashValue].value = v;
-		buckets[hashValue].key = k;
-	}
-	else
-	{
-		//Set a pointer to the current bucket
-		HashMapNode<K,V>* currBucket = &buckets[hashValue];
-		//Move through the linked lists of buckets until an empty bucket is found
-		while( currBucket->next and currBucket->key != k )
-		{
-			currBucket = currBucket->next;
-			if( currBucket->key == k )
-			{
-				currBucket->value = v;
-				return v;
-			}
-		}
-		//When an empty bucket is found attach a new node to it with the desired values
-		currBucket->next = new HashMapNode<K,V>( k,v );
-	}
-	return v;
+    
+    //If there is no value in the current hashvalue bucket
+    if( !buckets[hashValue].value || buckets[hashValue].key == k )
+    {
+        buckets[hashValue].value = v;
+        buckets[hashValue].key = k;
+    }
+    else
+    {
+        //Set a pointer to the current bucket
+        HashMapNode<K,V>* currBucket = &buckets[hashValue];
+        //Move through the linked lists of buckets until an empty bucket is found
+        while( currBucket->next and currBucket->key != k )
+        {
+            currBucket = currBucket->next;
+            if( currBucket->key == k )
+            {
+                currBucket->value = v;
+                return v;
+            }
+        }
+        //When an empty bucket is found attach a new node to it with the desired values
+        currBucket->next = new HashMapNode<K,V>( k,v );
+    }
+    return v;
 }
 
 template <typename K, typename V>
 void HashMap<K,V>::remove( K k )
 {
-	//Get hash value of k
-	uint32_t hashValue = hash( k );	
+    //Get hash value of k
+    uint32_t hashValue = hash( k ); 
 
-	if( buckets[hashValue].key == k )
-	{
-		buckets[hashValue] = *buckets[hashValue].next;
-	}
-	else
-	{	
-		//Set a pointer to the previous bucket
-		HashMapNode<K, V>* prevBucket = &buckets[hashValue];
-		//Set a pointer to the current bucket
-		HashMapNode<K, V>* currBucket = buckets[hashValue].next;
-		
-		while( currBucket )
-		{
-			if( currBucket->key == k )
-			{
-				prevBucket->next = currBucket->next;
-				delete currBucket;
-				break;
-			}
-			prevBucket = prevBucket->next;
-			currBucket = currBucket->next;
-		}
-	}
-		
+    if( buckets[hashValue].key == k )
+    {
+        buckets[hashValue] = *buckets[hashValue].next;
+    }
+    else
+    {   
+        //Set a pointer to the previous bucket
+        HashMapNode<K, V>* prevBucket = &buckets[hashValue];
+        //Set a pointer to the current bucket
+        HashMapNode<K, V>* currBucket = buckets[hashValue].next;
+        
+        while( currBucket )
+        {
+            if( currBucket->key == k )
+            {
+                prevBucket->next = currBucket->next;
+                delete currBucket;
+                break;
+            }
+            prevBucket = prevBucket->next;
+            currBucket = currBucket->next;
+        }
+    }
+        
 }
 
 template <typename K, typename V>
 void *HashMap<K,V>::get( K k )
 {
-	//Get the hash value of k
-	uint32_t hashValue = hash( k );
-	
-	//Check if the bucket with this key exists
-	if(  numBuckets < hashValue || !buckets[hashValue].key )
-		return NULL;
+    //Get the hash value of k
+    uint32_t hashValue = hash( k );
+    
+    //Check if the bucket with this key exists
+    if(  numBuckets < hashValue || !buckets[hashValue].key )
+        return NULL;
 
-	//Check if the has bucket has key k
-	if( buckets[hashValue].key == k )
-		return buckets[hashValue].value;
-	else
-	{
-		//Look through the linked list to find key k
-		HashMapNode<K,V>* currBucket = &buckets[hashValue];
-		while( currBucket->next and currBucket->key != k )
-			currBucket = currBucket->next;
-		if( currBucket->key == k )
-			return currBucket->value;
-	}
-	//In the case that the key does not exist return NULL	
-	return NULL;
+    //Check if the has bucket has key k
+    if( buckets[hashValue].key == k )
+        return buckets[hashValue].value;
+    else
+    {
+        //Look through the linked list to find key k
+        HashMapNode<K,V>* currBucket = &buckets[hashValue];
+        while( currBucket->next and currBucket->key != k )
+            currBucket = currBucket->next;
+        if( currBucket->key == k )
+            return currBucket->value;
+    }
+    //In the case that the key does not exist return NULL   
+    return NULL;
 }
 
 template <typename K, typename V>
 void HashMap<K,V>::clear()
 {
-	//Clear all linked lists in each bucket
+    //Clear all linked lists in each bucket
     for( int i = 0; i < numBuckets; ++i )
     {
         if( buckets[i].next )
@@ -216,31 +216,31 @@ void HashMap<K,V>::clear()
                 currBucket = next;
             }
         }
-		//Set each bucket to NULL
-		buckets[i] = NULL;
+        //Set each bucket to NULL
+        buckets[i] = NULL;
     }
 }
 
 template <typename K, typename V>
 void HashMap<K,V>::destroyHashMap()
 {
-	//Clear all linked lists in each bucket
-	for( int i = 0; i < numBuckets; ++i )
-	{
-		if( buckets[i].next )
-		{
-			HashMapNode<K,V>* currBucket = buckets[i].next;
-			HashMapNode<K,V>* next;
-			while( currBucket )
-			{				
-				next = currBucket->next;
-				delete currBucket;
-				currBucket = next;
-			}
-		}
-	} 
-	//Delete the buckets array
-	delete []buckets;
+    //Clear all linked lists in each bucket
+    for( int i = 0; i < numBuckets; ++i )
+    {
+        if( buckets[i].next )
+        {
+            HashMapNode<K,V>* currBucket = buckets[i].next;
+            HashMapNode<K,V>* next;
+            while( currBucket )
+            {               
+                next = currBucket->next;
+                delete currBucket;
+                currBucket = next;
+            }
+        }
+    } 
+    //Delete the buckets array
+    delete []buckets;
 }
 
 #endif
