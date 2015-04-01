@@ -19,7 +19,7 @@ template <typename K, typename V>
 struct HashMapNode
 {
 	//Key value of the node
-    K key;
+    void *key;
 	//Stored value for the key value pair
     void *value;
    	//The next hash node with the same hash value
@@ -146,23 +146,24 @@ void HashMap<K,V>::remove( K k )
 {
 	//Get hash value of k
 	uint32_t hashValue = hash( k );	
+
 	if( buckets[hashValue].key == k )
 	{
 		buckets[hashValue] = *buckets[hashValue].next;
 	}
 	else
-	{
+	{	
 		//Set a pointer to the previous bucket
 		HashMapNode<K, V>* prevBucket = &buckets[hashValue];
 		//Set a pointer to the current bucket
 		HashMapNode<K, V>* currBucket = buckets[hashValue].next;
+		
 		while( currBucket )
 		{
 			if( currBucket->key == k )
 			{
-				//(*prevBucket->next).destroyHashMapNode();
-				delete prevBucket->next;
 				prevBucket->next = currBucket->next;
+				delete currBucket;
 				break;
 			}
 			prevBucket = prevBucket->next;
@@ -177,6 +178,11 @@ void *HashMap<K,V>::get( K k )
 {
 	//Get the hash value of k
 	uint32_t hashValue = hash( k );
+	
+	//Check if the bucket with this key exists
+	if(  numBuckets < hashValue || !buckets[hashValue].key )
+		return NULL;
+
 	//Check if the has bucket has key k
 	if( buckets[hashValue].key == k )
 		return buckets[hashValue].value;
